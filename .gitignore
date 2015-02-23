@@ -1,0 +1,7 @@
+Gemfile.lock
+Jarfile.lock
+.DS_Store
+pkg
+tester.rb
+.jbundler
+.ruby-version
