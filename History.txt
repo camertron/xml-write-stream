@@ -1,3 +1,7 @@
+== 1.1.0
+
+* Add ability to write tags on single lines.
+
 == 1.0.0
 
 * Birthday!
