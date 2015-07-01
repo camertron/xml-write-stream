@@ -45,13 +45,34 @@ describe XmlWriteStream::YieldingWriter do
     end
   end
 
+  describe '#open_single_line_tag' do
+    it 'writes a tag and its contents on a single line' do
+      stream_writer.open_single_line_tag('maytag')
+      stream_writer.write_text('foobar')
+      stream_writer.close_tag
+      expect(stream.string).to eq("<maytag>foobar</maytag>")
+    end
+
+    it 'works with nested tags' do
+      stream_writer.open_single_line_tag('maytag')
+      stream_writer.write_text('foobar')
+      stream_writer.open_single_line_tag('gutentag')
+      stream_writer.write_text('foobaz')
+      stream_writer.close_tag
+      stream_writer.close_tag
+      expect(stream.string).to eq(
+        "<maytag>foobar<gutentag>foobaz</gutentag></maytag>"
+      )
+    end
+  end
+
   describe '#open_tag' do
     it 'writes an opening tag' do
       stream_writer.open_tag('maytag')
       stream_writer.close
 
       expect(stream.string).to eq(
-        utf8("<maytag>\n</maytag>\n")
+        utf8("<maytag>\n</maytag>")
       )
     end
 
@@ -60,7 +81,7 @@ describe XmlWriteStream::YieldingWriter do
       stream_writer.close
 
       expect(stream.string).to eq(
-        utf8("<maytag type=\"washing_machine\">\n</maytag>\n")
+        utf8("<maytag type=\"washing_machine\">\n</maytag>")
       )
     end
 
@@ -82,7 +103,7 @@ describe XmlWriteStream::YieldingWriter do
       stream_writer.close
 
       expect(stream.string).to eq(
-        utf8("<foo9>\n    <bar:baz>\n    </bar:baz>\n</foo9>\n")
+        utf8("<foo9>\n    <bar:baz>\n    </bar:baz>\n</foo9>")
       )
     end
 
@@ -101,7 +122,7 @@ describe XmlWriteStream::YieldingWriter do
       stream_writer.close_tag
 
       expect(stream.string).to eq(
-        utf8("<maytag>\n</maytag>\n")
+        utf8("<maytag>\n</maytag>")
       )
     end
   end
@@ -113,7 +134,7 @@ describe XmlWriteStream::YieldingWriter do
       stream_writer.close
 
       expect(stream.string).to eq(
-        utf8("<places>\n    Alaska &amp; Hawai&apos;i\n</places>\n")
+        utf8("<places>\n    Alaska &amp; Hawai&apos;i\n</places>")
       )
     end
 
@@ -123,7 +144,7 @@ describe XmlWriteStream::YieldingWriter do
       stream_writer.close
 
       expect(stream.string).to eq(
-        utf8("<places>\n    Alaska & Hawai'i\n</places>\n")
+        utf8("<places>\n    Alaska & Hawai'i\n</places>")
       )
     end
 
@@ -150,7 +171,7 @@ describe XmlWriteStream::YieldingWriter do
       stream_writer.flush
 
       expect(stream.string).to eq(
-        utf8("<foo>\n    <bar>\n        <baz>\n        </baz>\n    </bar>\n</foo>\n")
+        utf8("<foo>\n    <bar>\n        <baz>\n        </baz>\n    </bar>\n</foo>")
       )
 
       expect(stream).to_not be_closed
@@ -166,7 +187,7 @@ describe XmlWriteStream::YieldingWriter do
       stream_writer.close
 
       expect(stream.string).to eq(
-        utf8("<foo>\n    <bar>\n        <baz>\n        </baz>\n    </bar>\n</foo>\n")
+        utf8("<foo>\n    <bar>\n        <baz>\n        </baz>\n    </bar>\n</foo>")
       )
 
       expect(stream).to be_closed

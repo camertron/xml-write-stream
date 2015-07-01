@@ -14,12 +14,14 @@ class XmlWriteStream
       check_closed
       check_tag_name(tag_name)
       check_attributes(attributes)
+      stream.write(indent_spaces)
       write_open_tag(tag_name, attributes)
       write_newline
 
       @level += 1
       yield self if block_given?
       @level -= 1
+      stream.write(indent_spaces)
       write_close_tag(tag_name)
       write_newline
     end
@@ -31,7 +33,9 @@ class XmlWriteStream
         raise NoTopLevelTagError
       end
 
+      stream.write(indent_spaces)
       super
+      write_newline
     end
 
     def write_header(attributes = {})

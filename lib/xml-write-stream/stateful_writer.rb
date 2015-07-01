@@ -1,6 +1,17 @@
 # encoding: UTF-8
 
 class XmlWriteStream
+  class StackItem
+    attr_reader :tag_name, :multiline
+
+    def initialize(tag_name, multiline = true)
+      @tag_name = tag_name
+      @multiline = multiline
+    end
+
+    alias_method :multiline?, :multiline
+  end
+
   class StatefulWriter < Base
     attr_reader :stream, :stack, :closed, :indent, :index
     alias :closed? :closed
@@ -14,15 +25,31 @@ class XmlWriteStream
     end
 
     def open_tag(tag_name, attributes = {})
+      open_tag_helper(tag_name, true, attributes)
+    end
+
+    def open_single_line_tag(tag_name, attributes = {})
+      open_tag_helper(tag_name, false, attributes)
+    end
+
+    def open_tag_helper(tag_name, multiline, attributes = {})
       check_eos
-      @index += 1
+
+      if index == 0
+        stack.push(StackItem.new(tag_name, multiline))
+      end
 
       check_tag_name(tag_name)
       check_attributes(attributes)
+      stream.write(indent_spaces) if index > 0 && current.multiline?
       write_open_tag(tag_name, attributes)
-      write_newline
+      write_newline if multiline
 
-      stack.push(tag_name)
+      if index > 0
+        stack.push(StackItem.new(tag_name, multiline))
+      end
+
+      @index += 1
     end
 
     def write_text(text, options = {})
@@ -32,7 +59,10 @@ class XmlWriteStream
         raise NoTopLevelTagError
       end
 
+      stream.write(indent_spaces) if current.multiline?
       super
+
+      write_newline if current.multiline?
     end
 
     def write_header(attributes = {})
@@ -46,9 +76,10 @@ class XmlWriteStream
 
     def close_tag(options = {})
       if in_tag?
-        tag_name = stack.pop
-        write_close_tag(tag_name)
-        write_newline
+        stack_item = stack.pop
+        stream.write(indent_spaces) if stack_item.multiline?
+        write_close_tag(stack_item.tag_name)
+        write_newline if current && current.multiline?
       end
     end
 
@@ -70,6 +101,10 @@ class XmlWriteStream
 
     def eos?
       (stack.size == 0 && index > 0) || closed?
+    end
+
+    def current
+      stack.last
     end
 
     protected

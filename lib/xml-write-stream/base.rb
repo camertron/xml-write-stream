@@ -32,13 +32,10 @@ class XmlWriteStream
 
     def write_text(text, options = {})
       escape = options.fetch(:escape, true)
-      stream.write(indent_spaces)
 
       stream.write(
         escape ? escape_text(text) : text
       )
-
-      write_newline
     end
 
     def write_header(attributes = {})
@@ -70,7 +67,6 @@ class XmlWriteStream
     end
 
     def write_open_tag(tag_name, attributes)
-      stream.write(indent_spaces)
       stream.write("<#{tag_name}")
 
       if attributes.size > 0
@@ -82,7 +78,6 @@ class XmlWriteStream
     end
 
     def write_close_tag(tag_name)
-      stream.write(indent_spaces)
       stream.write("</#{tag_name}>")
     end
 
